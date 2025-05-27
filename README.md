@@ -114,4 +114,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 For any queries or suggestions, please reach out to:
 - Email: [faizanayub16@gmail.com]
 - LinkedIn: [www.linkedin.com/in/faizan-hajam]
-- GitHub: [Your GitHub Profile] 
+- GitHub: [https://github.com/faizanHajam120]
