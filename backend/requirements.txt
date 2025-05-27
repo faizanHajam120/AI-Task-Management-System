@@ -1,0 +1,15 @@
+# ──────────────────────────  Web service  ──────────────────────────
+Flask==2.3.3
+Werkzeug==2.3.8
+flask-cors==3.0.10     # CORS headers for SPA / API interaction
+
+# ───────────────────────────  ML / SciPy  ──────────────────────────
+numpy>=1.23.0,<2.0.0
+pandas>=1.5.0,<2.0.0
+scipy>=1.9.0,<2.0.0
+scikit-learn>=1.3.0,<2.0.0   # vectorizer + RandomForest
+joblib>=1.2.0,<2.0.0          # model & vectorizer persistence
+
+# ─────────────────────────  Deployment  ────────────────────────────
+python-dotenv==0.19.2   # env-vars in local/dev
+gunicorn==20.1.0        # production WSGI server
