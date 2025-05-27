@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Prioritization Model Analysis</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/boxicons@2.0.7/css/boxicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(45deg, #4158D0, #C850C0);
+            --secondary-gradient: linear-gradient(45deg, #FF9A8B, #FF6A88);
+            --success-gradient: linear-gradient(45deg, #00C9FF, #92FE9D);
+            --warning-gradient: linear-gradient(45deg, #FFB800, #FF8A00);
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .analysis-card {
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: none;
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+        
+        .analysis-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .chart-container {
+            height: 400px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .feature-importance {
+            height: 300px;
+        }
+        
+        .confusion-matrix {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .confusion-matrix table {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .confusion-matrix th,
+        .confusion-matrix td {
+            padding: 12px;
+            text-align: center;
+        }
+        
+        .confusion-matrix th {
+            background: var(--primary-gradient);
+            color: white;
+            font-weight: 500;
+        }
+        
+        .confusion-matrix td {
+            background: white;
+            transition: all 0.3s ease;
+        }
+        
+        .confusion-matrix td:hover {
+            background: #f8f9fa;
+            transform: scale(1.05);
+        }
+        
+        .classifier-comparison {
+            margin-top: 20px;
+        }
+        
+        .classifier-comparison table {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .classifier-comparison th {
+            background: var(--primary-gradient);
+            color: white;
+            font-weight: 500;
+            padding: 15px;
+        }
+        
+        .classifier-comparison td {
+            padding: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .classifier-comparison tr:hover td {
+            background: #f8f9fa;
+        }
+        
+        .metric-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #4158D0;
+        }
+        
+        .metric-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .dataset-metric {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .dataset-metric:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dataset-metric .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #4158D0;
+            margin: 10px 0;
+        }
+        
+        .dataset-metric .label {
+            color: #666;
+            font-size: 1rem;
+        }
+        
+        .navbar {
+            background: var(--primary-gradient) !important;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        
+        .nav-link {
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            transform: translateY(-2px);
+        }
+        
+        .section-title {
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+        }
+        
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
+        }
+        
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .prediction-row {
+            transition: all 0.3s ease;
+        }
+        
+        .prediction-row:hover {
+            background: #f8f9fa;
+            transform: translateX(5px);
+        }
+        
+        .confidence-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        
+        .confidence-high {
+            background: #28a745;
+            color: white;
+        }
+        
+        .confidence-medium {
+            background: #ffc107;
+            color: #000;
+        }
+        
+        .confidence-low {
+            background: #dc3545;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Task Manager</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/model-analysis">Model Analysis</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2 class="section-title animate-on-scroll">Task Prioritization Model Analysis</h2>
+
+        <!-- Dataset Overview -->
+        <div class="card analysis-card animate-on-scroll">
+            <div class="card-body">
+                <h5 class="card-title">Dataset Overview</h5>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="dataset-metric">
+                            <i class='bx bx-data' style="font-size: 2rem; color: #4158D0;"></i>
+                            <div class="value">{{ total_issues }}</div>
+                            <div class="label">Total Issues</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="dataset-metric">
+                            <i class='bx bx-train' style="font-size: 2rem; color: #4158D0;"></i>
+                            <div class="value">{{ training_data_size }}</div>
+                            <div class="label">Training Set Size</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="dataset-metric">
+                            <i class='bx bx-test-tube' style="font-size: 2rem; color: #4158D0;"></i>
+                            <div class="value">{{ test_data_size }}</div>
+                            <div class="label">Test Set Size</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="dataset-metric">
+                            <i class='bx bx-book' style="font-size: 2rem; color: #4158D0;"></i>
+                            <div class="value">{{ tfidf_vocabulary }}</div>
+                            <div class="label">TF-IDF Vocabulary</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Classifier Comparison -->
+        <div class="card analysis-card animate-on-scroll">
+            <div class="card-body">
+                <h5 class="card-title">Classifier Comparison</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Classifier</th>
+                                <th>Accuracy</th>
+                                <th>Precision</th>
+                                <th>Recall</th>
+                                <th>F1 Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for classifier in classifiers %}
+                            <tr>
+                                <td>{{ classifier.name }}</td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar bg-primary" role="progressbar" 
+                                             style="width: {{ classifier.accuracy }}%;" 
+                                             aria-valuenow="{{ classifier.accuracy }}" 
+                                             aria-valuemin="0" 
+                                             aria-valuemax="100">
+                                            {{ classifier.accuracy }}%
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar bg-success" role="progressbar" 
+                                             style="width: {{ classifier.precision }}%;" 
+                                             aria-valuenow="{{ classifier.precision }}" 
+                                             aria-valuemin="0" 
+                                             aria-valuemax="100">
+                                            {{ classifier.precision }}%
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar bg-info" role="progressbar" 
+                                             style="width: {{ classifier.recall }}%;" 
+                                             aria-valuenow="{{ classifier.recall }}" 
+                                             aria-valuemin="0" 
+                                             aria-valuemax="100">
+                                            {{ classifier.recall }}%
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar bg-warning" role="progressbar" 
+                                             style="width: {{ classifier.f1_score }}%;" 
+                                             aria-valuenow="{{ classifier.f1_score }}" 
+                                             aria-valuemin="0" 
+                                             aria-valuemax="100">
+                                            {{ classifier.f1_score }}%
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div class="card analysis-card animate-on-scroll">
+            <div class="card-body">
+                <h5 class="card-title">Performance Metrics</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="chart-container">
+                            <canvas id="metricsChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="confusion-matrix">
+                            <h6 class="text-center mb-3">Confusion Matrix</h6>
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>Predicted High</th>
+                                        <th>Predicted Medium</th>
+                                        <th>Predicted Low</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th>Actual High</th>
+                                        <td>{{ confusion_matrix[0][0] }}</td>
+                                        <td>{{ confusion_matrix[0][1] }}</td>
+                                        <td>{{ confusion_matrix[0][2] }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Actual Medium</th>
+                                        <td>{{ confusion_matrix[1][0] }}</td>
+                                        <td>{{ confusion_matrix[1][1] }}</td>
+                                        <td>{{ confusion_matrix[1][2] }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Actual Low</th>
+                                        <td>{{ confusion_matrix[2][0] }}</td>
+                                        <td>{{ confusion_matrix[2][1] }}</td>
+                                        <td>{{ confusion_matrix[2][2] }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature Importance -->
+        <div class="card analysis-card animate-on-scroll">
+            <div class="card-body">
+                <h5 class="card-title">Feature Importance</h5>
+                <div class="chart-container">
+                    <canvas id="featureImportanceChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Model Predictions -->
+        <div class="card analysis-card animate-on-scroll">
+            <div class="card-body">
+                <h5 class="card-title">Sample Predictions</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Task Description</th>
+                                <th>Actual Priority</th>
+                                <th>Predicted Priority</th>
+                                <th>Confidence</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for prediction in sample_predictions %}
+                            <tr class="prediction-row">
+                                <td>{{ prediction.description }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'danger' if prediction.actual_priority == 'High' else 'warning' if prediction.actual_priority == 'Medium' else 'success' }}">
+                                        {{ prediction.actual_priority }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{{ 'danger' if prediction.predicted_priority == 'High' else 'warning' if prediction.predicted_priority == 'Medium' else 'success' }}">
+                                        {{ prediction.predicted_priority }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="confidence-badge confidence-{{ 'high' if prediction.confidence >= 70 else 'medium' if prediction.confidence >= 40 else 'low' }}">
+                                        {{ prediction.confidence }}%
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Animation on scroll
+        function checkScroll() {
+            const elements = document.querySelectorAll('.animate-on-scroll');
+            elements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const windowHeight = window.innerHeight;
+                if (elementTop < windowHeight - 100) {
+                    element.classList.add('visible');
+                }
+            });
+        }
+
+        window.addEventListener('scroll', checkScroll);
+        window.addEventListener('load', checkScroll);
+
+        // Performance Metrics Chart
+        const metricsCtx = document.getElementById('metricsChart').getContext('2d');
+        new Chart(metricsCtx, {
+            type: 'radar',
+            data: {
+                labels: ['Accuracy', 'Precision', 'Recall', 'F1 Score'],
+                datasets: [{
+                    label: 'Model Performance',
+                    data: [
+                        {{ model_accuracy }},
+                        {{ model_precision }},
+                        {{ model_recall }},
+                        {{ model_f1_score }}
+                    ],
+                    backgroundColor: 'rgba(65, 88, 208, 0.2)',
+                    borderColor: '#4158D0',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#4158D0',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            stepSize: 20
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        // Feature Importance Chart
+        const featureCtx = document.getElementById('featureImportanceChart').getContext('2d');
+        new Chart(featureCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ feature_names|tojson }},
+                datasets: [{
+                    label: 'Importance',
+                    data: {{ feature_importance|tojson }},
+                    backgroundColor: 'rgba(65, 88, 208, 0.8)',
+                    borderColor: '#4158D0',
+                    borderWidth: 1,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 1,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    y: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

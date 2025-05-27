@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/boxicons@2.0.7/css/boxicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(45deg, #4158D0, #C850C0);
+            --secondary-gradient: linear-gradient(45deg, #FF9A8B, #FF6A88);
+            --success-gradient: linear-gradient(45deg, #00C9FF, #92FE9D);
+            --warning-gradient: linear-gradient(45deg, #FFB800, #FF8A00);
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .dashboard-card {
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: none;
+            overflow: hidden;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .metric-card {
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: inherit;
+            opacity: 0.1;
+            z-index: 1;
+        }
+        
+        .metric-card .card-body {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .metric-card.high-priority {
+            background: var(--primary-gradient);
+        }
+        
+        .metric-card.medium-priority {
+            background: var(--warning-gradient);
+        }
+        
+        .metric-card.low-priority {
+            background: var(--success-gradient);
+        }
+        
+        .metric-card.total-tasks {
+            background: var(--secondary-gradient);
+        }
+        
+        .chart-container {
+            height: 350px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+        
+        .metric-label {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .metric-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .performance-metric {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .performance-metric:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .performance-metric .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #4158D0;
+            margin: 10px 0;
+        }
+        
+        .performance-metric .label {
+            color: #666;
+            font-size: 1rem;
+        }
+        
+        .navbar {
+            background: var(--primary-gradient) !important;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        
+        .nav-link {
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            transform: translateY(-2px);
+        }
+        
+        .section-title {
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+        }
+        
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
+        }
+        
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Task Manager</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/model-analysis">Model Analysis</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2 class="section-title animate-on-scroll">Task Management Dashboard</h2>
+        
+        <!-- Metrics Overview -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card dashboard-card metric-card total-tasks animate-on-scroll">
+                    <div class="card-body">
+                        <i class='bx bx-task metric-icon'></i>
+                        <h5 class="metric-label">Total Tasks</h5>
+                        <div class="metric-value">{{ total_tasks }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card dashboard-card metric-card high-priority animate-on-scroll">
+                    <div class="card-body">
+                        <i class='bx bx-error-circle metric-icon'></i>
+                        <h5 class="metric-label">High Priority</h5>
+                        <div class="metric-value">{{ high_priority_tasks }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card dashboard-card metric-card medium-priority animate-on-scroll">
+                    <div class="card-body">
+                        <i class='bx bx-time metric-icon'></i>
+                        <h5 class="metric-label">Medium Priority</h5>
+                        <div class="metric-value">{{ medium_priority_tasks }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card dashboard-card metric-card low-priority animate-on-scroll">
+                    <div class="card-body">
+                        <i class='bx bx-check-circle metric-icon'></i>
+                        <h5 class="metric-label">Low Priority</h5>
+                        <div class="metric-value">{{ low_priority_tasks }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card dashboard-card animate-on-scroll">
+                    <div class="card-body">
+                        <h5 class="card-title">Priority Distribution</h5>
+                        <div class="chart-container">
+                            <canvas id="priorityChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card dashboard-card animate-on-scroll">
+                    <div class="card-body">
+                        <h5 class="card-title">Task Completion Trend</h5>
+                        <div class="chart-container">
+                            <canvas id="completionTrendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Model Performance Metrics -->
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card dashboard-card animate-on-scroll">
+                    <div class="card-body">
+                        <h5 class="card-title">Model Performance</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="performance-metric">
+                                    <i class='bx bx-bullseye' style="font-size: 2rem; color: #4158D0;"></i>
+                                    <div class="value">{{ model_accuracy }}%</div>
+                                    <div class="label">Accuracy</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="performance-metric">
+                                    <i class='bx bx-target-lock' style="font-size: 2rem; color: #4158D0;"></i>
+                                    <div class="value">{{ model_precision }}%</div>
+                                    <div class="label">Precision</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="performance-metric">
+                                    <i class='bx bx-refresh' style="font-size: 2rem; color: #4158D0;"></i>
+                                    <div class="value">{{ model_recall }}%</div>
+                                    <div class="label">Recall</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Animation on scroll
+        function checkScroll() {
+            const elements = document.querySelectorAll('.animate-on-scroll');
+            elements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const windowHeight = window.innerHeight;
+                if (elementTop < windowHeight - 100) {
+                    element.classList.add('visible');
+                }
+            });
+        }
+
+        window.addEventListener('scroll', checkScroll);
+        window.addEventListener('load', checkScroll);
+
+        // Priority Distribution Chart
+        const priorityCtx = document.getElementById('priorityChart').getContext('2d');
+        new Chart(priorityCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['High', 'Medium', 'Low'],
+                datasets: [{
+                    data: {{ [high_priority_tasks, medium_priority_tasks, low_priority_tasks]|tojson }},
+                    backgroundColor: ['#dc3545', '#ffc107', '#28a745'],
+                    borderWidth: 0,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            font: {
+                                size: 14
+                            }
+                        }
+                    }
+                },
+                cutout: '70%'
+            }
+        });
+
+        // Task Completion Trend Chart
+        const trendCtx = document.getElementById('completionTrendChart').getContext('2d');
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: {{ completion_dates|tojson }},
+                datasets: [{
+                    label: 'Completed Tasks',
+                    data: {{ completion_counts|tojson }},
+                    borderColor: '#4158D0',
+                    backgroundColor: 'rgba(65, 88, 208, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#4158D0',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

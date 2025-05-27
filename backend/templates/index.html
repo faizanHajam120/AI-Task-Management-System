@@ -34,6 +34,55 @@
             min-height: 100vh;
         }
 
+        .navbar {
+            background: var(--surface);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .navbar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .navbar-brand {
+            color: var(--primary);
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-decoration: none;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .navbar-nav {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+        }
+
+        .nav-link:hover {
+            color: var(--text);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .nav-link.active {
+            color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -364,11 +413,22 @@
     </style>
 </head>
 <body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="navbar-brand">AI Task Prioritizer</a>
+            <ul class="navbar-nav">
+                <li><a href="/" class="nav-link active">Home</a></li>
+                <li><a href="/dashboard" class="nav-link">Dashboard</a></li>
+                <li><a href="/model-analysis" class="nav-link">Model Analysis</a></li>
+            </ul>
+        </div>
+    </nav>
+
     <div class="container">
-        <header class="header">
+        <div class="header">
             <h1>AI Task Prioritizer</h1>
-            <p>Leverage the power of machine learning to automatically analyze and prioritize your tasks based on their content, urgency, and importance.</p>
-        </header>
+            <p>Leverage the power of AI to automatically prioritize your tasks based on their descriptions and importance.</p>
+        </div>
 
         <div class="features">
             <div class="feature-card">
