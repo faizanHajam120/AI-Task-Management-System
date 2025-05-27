@@ -44,4 +44,19 @@ Thumbs.db
 
 # Model files (if they're large)
 # Uncomment if you don't want to track model files
-# backend/models/*.pkl 
+# backend/models/*.pkl
+
+# Python virtual environment
+venv311/
+__pycache__/
+*.pyc
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environment variables
+.env
+
+# IDE specific files
+.vscode/
+.idea/ 
